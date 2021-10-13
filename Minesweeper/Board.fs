@@ -11,23 +11,24 @@ open MineState
 open ValuedCellState
 open MineCell
 open ValuedCell
+open CellState
 
-type Board (?_difficulty : Difficulty, ?_mineCellCallBack : EventArgs * Label -> unit, ?_valuedCellCallBack : EventArgs * Label * int -> unit, ?_mineCount : int, ?_size : Point) =
+type Board (?_difficulty : Difficulty, ?_mineCellCallBack : MouseEventArgs * Label * CellState -> unit, ?_valuedCellCallBack : MouseEventArgs * Label * int * CellState * int * int -> unit, ?_mineCount : int, ?_size : Point) =
     let panel = new Panel()
-    let cells : BaseCell list = []
-    member this.init(_difficulty : Difficulty, _mineCellCallBack : EventArgs * Label -> unit, _valuedCellCallBack : EventArgs * Label * int -> unit, _mineCount : int, _size : Point) =
+    let mutable cells : BaseCell[] = [||]
+    member this.init(_difficulty : Difficulty, _mineCellCallBack : MouseEventArgs * Label * CellState -> unit, _valuedCellCallBack : MouseEventArgs * Label * int * CellState * int * int -> unit, _mineCount : int, _size : Point) =
         let mineCount = match _mineCount with
                         | n when n > 0 -> n
                         | _ -> int<Difficulty> _difficulty
         let size = match _size with
                         | s when not (s.IsEmpty) -> s
                         | _ -> match _difficulty with
-                                    | Difficulty.Beginner -> BoardSizes.beginner
-                                    | Difficulty.Intermediate -> BoardSizes.intermediate
-                                    | Difficulty.Expert -> BoardSizes.expert
+                                    | Difficulty.Beginner -> BoardSizes.Beginner
+                                    | Difficulty.Intermediate -> BoardSizes.Intermediate
+                                    | Difficulty.Expert -> BoardSizes.Expert
                                     | _ -> new Point()
         let rand = new Random()
-        let cells : BaseCell[] = [| for x = 0 to size.X - 1 do
+        cells <- [| for x = 0 to size.X - 1 do
                                         for y = 0 to size.Y - 1 do
                                             yield new ValuedCell(0, x, y, _valuedCellCallBack) :> BaseCell |]
 
@@ -60,8 +61,8 @@ type Board (?_difficulty : Difficulty, ?_mineCellCallBack : EventArgs * Label ->
     new () =
         Board(Difficulty.Beginner)
 
-    new (_mineCellCallBack : EventArgs * Label -> unit, _valuedCellCallBack : EventArgs * Label * int -> unit) = 
+    new (_mineCellCallBack : MouseEventArgs * Label * CellState -> unit, _valuedCellCallBack : MouseEventArgs * Label * int * CellState * int * int -> unit) = 
         Board(Difficulty.Beginner, _mineCellCallBack, _valuedCellCallBack)
 
-    new (_mineCellCallBack : EventArgs * Label -> unit, _valuedCellCallBack : EventArgs * Label * int -> unit, _mineCount : int, _size : Point) =
+    new (_mineCellCallBack : MouseEventArgs * Label * CellState -> unit, _valuedCellCallBack : MouseEventArgs * Label * int * CellState * int * int -> unit, _mineCount : int, _size : Point) =
         Board(Difficulty.Beginner, _mineCellCallBack, _valuedCellCallBack, _mineCount, _size)

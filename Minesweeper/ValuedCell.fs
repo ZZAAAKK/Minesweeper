@@ -5,31 +5,47 @@ open System.Windows.Forms
 open System.Drawing
 
 open BaseCell
-open MineCell
+open CellState
 open ValuedCellState
-open ValuedCellImages
+open MinesweeperResourceManager
 
-type ValuedCell (_value : int, _col : int, _row : int, _callBack : EventArgs * Label * int -> unit) =
-    inherit BaseCell(CellState.Valued, _col, _row)
+type ValuedCell (_value : int, _col : int, _row : int, _callBack : MouseEventArgs * Label * int * CellState * int * int -> unit) =
+    inherit BaseCell(_col, _row)
     let mutable value = _value
-    let mutable state = ValuedCellState.Covered
+    let mutable valuedCellState = Covered
+    let mutable cellState = Unopened
     let label = new Label()
-    let Label_OnClick (e : EventArgs) =
-        match state with
-        | ValuedCellState.Covered -> 
-                state <- ValuedCellState.Uncovered
-                label.BackgroundImage <- Image.FromFile(ValuedCellImages.[value])
-        | ValuedCellState.Uncovered -> ignore()
+    let Label_OnClick (e : MouseEventArgs) =
+        match e.Button with
+        | MouseButtons.Left -> 
+            if valuedCellState = Covered then
+                valuedCellState <- Uncovered
+        | MouseButtons.Right ->
+            if not (valuedCellState = Uncovered) then
+                match cellState with
+                | Question_Mark -> 
+                    cellState <- Unopened
+                | Flag -> 
+                    cellState <- Question_Mark
+                | Unopened -> 
+                    cellState <- Flag
+                label.BackgroundImage <- GetResource($"{cellState}")
+        | _ -> ()
     do
-        let image = Image.FromFile("C:\\Users\\zakth\\source\\repos\\Minesweeper\\Minesweeper\\Resources\\Unopened.png")
+        let image = GetResource($"{cellState}")
         label.Size <- new Size(image.Size.Height / 2, image.Size.Width / 2)
         label.BackgroundImageLayout <- ImageLayout.Stretch
         label.BackgroundImage <- image
         label.Left <- (image.Width / 2) * _col
         label.Top <- (image.Height / 2) * _row
-        label.Click.Add(fun e -> _callBack(e, label, value))
+        label.MouseClick.Add(fun e -> _callBack(e, label, value, cellState, _col, _row))
+        label.MouseClick.Add(Label_OnClick)
     
     member this.Value = value
-    member this.State with get() = state and set(value) = state <- value
+    member this.Reveal() = 
+        valuedCellState <- Uncovered
+        label.BackgroundImage <- GetResource($"Minesweeper_{value}")
     member this.IncrementValue() = value <- value + 1
+    member this.ValuedCellState = valuedCellState
+    override this.CellState = cellState
     override this.Label = label

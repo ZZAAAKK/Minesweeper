@@ -22,10 +22,10 @@
     <Content Include="Resources\Mine_Revealed.png" />
     <Content Include="Resources\Question_Mark.png" />
     <Content Include="Resources\Unopened.png" />
+    <Compile Include="MinesweeperResourceManager.fs" />
     <Compile Include="MineState.fs" />
     <Compile Include="CellState.fs" />
     <Compile Include="ValuedCellState.fs" />
-    <Compile Include="ValuedCellImages.fs" />
     <Compile Include="Difficulty.fs" />
     <Compile Include="BoardSizes.fs" />
     <Compile Include="BaseCell.fs" />
@@ -42,5 +42,11 @@
 
   <ItemGroup>
     <Folder Include="Properties\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Resources\Resource.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>

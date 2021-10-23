@@ -43,12 +43,12 @@ type Interface () =
                             region <- v :: region
                     | _ -> ()
 
-    let Reset (minecell_Callback : MouseEventArgs * Label * CellState * int * int -> unit, valuedCell_Callback : MouseEventArgs * Label * int * CellState * int * int -> unit) =
+    let Reset (cell_Callback : MouseEventArgs * Label * CellState * int * int -> unit) =
         board.DropCells()
         board.Panel.Dispose()
         board <- new Board()
         form.Controls.Add(board.Panel)
-        board.init(difficulty, minecell_Callback, valuedCell_Callback, mineCount, size)
+        board.init(difficulty, cell_Callback, mineCount, size)
         form.ClientSize <- new Size(board.Panel.Size.Width, board.Panel.Size.Height + 38)
         banner.ResetTimerNewGame <| mineCount
 
@@ -95,7 +95,7 @@ type Interface () =
             count
         }
 
-    let rec ValuedCell_OnClick (e : MouseEventArgs, _label : Label, _value : int, _cellState : CellState, _col : int, _row : int) =
+    let Cell_OnClick (e : MouseEventArgs, _label : Label, _cellState : CellState, _col : int, _row : int) =
         match e.Button with
         | MouseButtons.Left -> 
             if _cellState = CellState.Unopened then 
@@ -111,57 +111,17 @@ type Interface () =
                     elif c.Value > 0 && c.ValuedCellState = Uncovered then
                         if c |> GetNearestNeighbours |> ResolveNeighbours then
                             banner.Defeat()
-                            let rec MineCell_OnClick (e : MouseEventArgs, _label : Label, _cellState : CellState, _col : int, _row : int) =
-                                match e.Button with
-                                | MouseButtons.Left -> 
-                                    banner.Defeat()
-                                    for cell in board.Cells do 
-                                        match cell with
-                                        | :? MineCell as c -> c.Reveal()
-                                        | _ -> ()
-                                    _label.BackgroundImage <- GetResource("Mine_Exploded")
-                                    board.Panel.Enabled <- false
-                                    match MessageBox.Show("You lose!\n\nPlay again?", "Game Over", MessageBoxButtons.YesNo) with
-                                    | DialogResult.Yes -> Reset(MineCell_OnClick, ValuedCell_OnClick)
-                                    | _ -> Application.Exit()
-                                | MouseButtons.Right ->
-                                    let cell = GetCell _col _row
-                                    cell.UpdateCellState <| match cell.CellState with
-                                                            | Question_Mark -> Unopened
-                                                            | Flag -> Question_Mark
-                                                            | Unopened -> Flag
-                                    _label.BackgroundImage <- GetResource($"{cell.CellState}")
-                                    banner.UpdateMineCounter(mineCount - FlaggedMines())
-                                | _ -> ignore()
                             board.Panel.Enabled <- false
-                            match MessageBox.Show("You lose!\n\nPlay again?", "Game Over", MessageBoxButtons.YesNo) with
-                            | DialogResult.Yes -> Reset(MineCell_OnClick, ValuedCell_OnClick)                
-                            | _ -> Application.Exit()
                     if RemainingCells() = mineCount then banner.Victory()
+                | :? MineCell ->
+                    banner.Defeat()
+                    for cell in board.Cells do 
+                        match cell with
+                        | :? MineCell as c -> c.Reveal()
+                        | _ -> ()
+                    _label.BackgroundImage <- GetResource("Mine_Exploded")
+                    board.Panel.Enabled <- false
                 | _ -> ()
-        | MouseButtons.Right ->
-            let cell = GetCell _col _row
-            cell.UpdateCellState <| match cell.CellState with
-                                    | Question_Mark -> Unopened
-                                    | Flag -> Question_Mark
-                                    | Unopened -> Flag
-            _label.BackgroundImage <- GetResource($"{cell.CellState}")
-            banner.UpdateMineCounter(mineCount - FlaggedMines())
-        | _ -> ignore()
-
-    let rec MineCell_OnClick (e : MouseEventArgs, _label : Label, _cellState : CellState, _col : int, _row : int) =
-        match e.Button with
-        | MouseButtons.Left -> 
-            banner.Defeat()
-            for cell in board.Cells do 
-                match cell with
-                | :? MineCell as c -> c.Reveal()
-                | _ -> ()
-            _label.BackgroundImage <- GetResource("Mine_Exploded")
-            board.Panel.Enabled <- false
-            match MessageBox.Show("You lose!\n\nPlay again?", "Game Over", MessageBoxButtons.YesNo) with
-            | DialogResult.Yes -> Reset(MineCell_OnClick, ValuedCell_OnClick)
-            | _ -> Application.Exit()
         | MouseButtons.Right ->
             let cell = GetCell _col _row
             cell.UpdateCellState <| match cell.CellState with
@@ -177,11 +137,11 @@ type Interface () =
         if mineCount = 0 then mineCount <- int<Difficulty> difficulty
         banner.UpdateMineCounter(mineCount)
         form.Controls.AddRange(controls)
-        board.init(difficulty, MineCell_OnClick, ValuedCell_OnClick, mineCount, size)
-        banner.SetResetCallback((fun e -> Reset(MineCell_OnClick, ValuedCell_OnClick)))
+        board.init(difficulty, Cell_OnClick, mineCount, size)
+        banner.SetResetCallback((fun _ -> Reset(Cell_OnClick)))
         form.ClientSize <- new Size(board.Panel.Size.Width, board.Panel.Size.Height + 38)
         form.FormBorderStyle <- FormBorderStyle.FixedSingle
         form.Text <- "Minesweeper"
 
     member this.Form = form
-    member this.NewGame() = Reset(MineCell_OnClick, ValuedCell_OnClick)
+    member this.NewGame() = Reset(Cell_OnClick)

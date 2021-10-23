@@ -13,11 +13,11 @@ open MineCell
 open ValuedCell
 open CellState
 
-type Board (?_difficulty : Difficulty, ?_mineCellCallBack : MouseEventArgs * Label * CellState * int * int -> unit, ?_valuedCellCallBack : MouseEventArgs * Label * int * CellState * int * int -> unit, ?_mineCount : int, ?_size : Point) =
+type Board (?_difficulty : Difficulty, ?_cellCallBack : MouseEventArgs * Label * CellState * int * int -> unit, ?_mineCount : int, ?_size : Point) =
     let panel = new Panel()
     let mutable cells : BaseCell[] = [||]
     let mutable size = new Point()
-    member this.init(_difficulty : Difficulty, _mineCellCallBack : MouseEventArgs * Label * CellState * int * int -> unit, _valuedCellCallBack : MouseEventArgs * Label * int * CellState * int * int -> unit, _mineCount : int, _size : Point) =
+    member this.init(_difficulty : Difficulty, _cellCallBack : MouseEventArgs * Label * CellState * int * int -> unit, _mineCount : int, _size : Point) =
         let mineCount = match _mineCount with
                         | n when n > 0 -> n
                         | _ -> int<Difficulty> _difficulty
@@ -31,7 +31,7 @@ type Board (?_difficulty : Difficulty, ?_mineCellCallBack : MouseEventArgs * Lab
         let rand = new Random()
         cells <- [| for x = 0 to size.X - 1 do
                                         for y = 0 to size.Y - 1 do
-                                            yield new ValuedCell(0, x, y, _valuedCellCallBack) :> BaseCell |]
+                                            yield new ValuedCell(0, x, y, _cellCallBack) :> BaseCell |]
 
         panel.Size <- new Size(size.X * 38, size.Y * 38)
         let mutable mineCells : BaseCell list = []
@@ -39,7 +39,7 @@ type Board (?_difficulty : Difficulty, ?_mineCellCallBack : MouseEventArgs * Lab
             let rec GetRandomCell () =
                 let index = rand.Next(0, cells.Length)
                 if not (mineCells |> List.contains(cells.[index])) then
-                    cells.[index] <- new MineCell(cells.[index].Column, cells.[index].Row, _mineCellCallBack) :> BaseCell
+                    cells.[index] <- new MineCell(cells.[index].Column, cells.[index].Row, _cellCallBack) :> BaseCell
                     mineCells <- cells.[index] :: mineCells
                     for i = -1 to 1 do
                         for j = -1 to 1 do
@@ -67,8 +67,8 @@ type Board (?_difficulty : Difficulty, ?_mineCellCallBack : MouseEventArgs * Lab
     new () =
         Board(Difficulty.Beginner)
 
-    new (_mineCellCallBack : MouseEventArgs * Label * CellState * int * int -> unit, _valuedCellCallBack : MouseEventArgs * Label * int * CellState * int * int -> unit) = 
-        Board(Difficulty.Beginner, _mineCellCallBack, _valuedCellCallBack)
+    new (_cellCallBack : MouseEventArgs * Label * CellState * int * int -> unit) = 
+        Board(Difficulty.Beginner, _cellCallBack)
 
-    new (_mineCellCallBack : MouseEventArgs * Label * CellState * int * int -> unit, _valuedCellCallBack : MouseEventArgs * Label * int * CellState * int * int -> unit, _mineCount : int, _size : Point) =
-        Board(Difficulty.Beginner, _mineCellCallBack, _valuedCellCallBack, _mineCount, _size)
+    new (_cellCallBack : MouseEventArgs * Label * CellState * int * int -> unit, _mineCount : int, _size : Point) =
+        Board(Difficulty.Beginner, _cellCallBack, _mineCount, _size)

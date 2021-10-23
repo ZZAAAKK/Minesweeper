@@ -114,6 +114,7 @@ type Interface () =
                             let rec MineCell_OnClick (e : MouseEventArgs, _label : Label, _cellState : CellState, _col : int, _row : int) =
                                 match e.Button with
                                 | MouseButtons.Left -> 
+                                    banner.Defeat()
                                     for cell in board.Cells do 
                                         match cell with
                                         | :? MineCell as c -> c.Reveal()
@@ -123,6 +124,14 @@ type Interface () =
                                     match MessageBox.Show("You lose!\n\nPlay again?", "Game Over", MessageBoxButtons.YesNo) with
                                     | DialogResult.Yes -> Reset(MineCell_OnClick, ValuedCell_OnClick)
                                     | _ -> Application.Exit()
+                                | MouseButtons.Right ->
+                                    let cell = GetCell _col _row
+                                    cell.UpdateCellState <| match cell.CellState with
+                                                            | Question_Mark -> Unopened
+                                                            | Flag -> Question_Mark
+                                                            | Unopened -> Flag
+                                    _label.BackgroundImage <- GetResource($"{cell.CellState}")
+                                    banner.UpdateMineCounter(mineCount - FlaggedMines())
                                 | _ -> ignore()
                             board.Panel.Enabled <- false
                             match MessageBox.Show("You lose!\n\nPlay again?", "Game Over", MessageBoxButtons.YesNo) with

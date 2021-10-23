@@ -20,17 +20,7 @@ type ValuedCell (_value : int, _col : int, _row : int, _callBack : MouseEventArg
         | MouseButtons.Left -> 
             if valuedCellState = Covered then
                 valuedCellState <- Uncovered
-        | MouseButtons.Right ->
-            if not (valuedCellState = Uncovered) then
-                match cellState with
-                | Question_Mark -> 
-                    cellState <- Unopened
-                | Flag -> 
-                    cellState <- Question_Mark
-                | Unopened -> 
-                    cellState <- Flag
-                label.BackgroundImage <- GetResource($"{cellState}")
-        | _ -> ()
+        | _ -> ignore()
     do
         let image = GetResource($"{cellState}")
         label.Size <- new Size(image.Size.Height / 2, image.Size.Width / 2)
@@ -43,9 +33,11 @@ type ValuedCell (_value : int, _col : int, _row : int, _callBack : MouseEventArg
     
     member this.Value = value
     member this.Reveal() = 
-        valuedCellState <- Uncovered
-        label.BackgroundImage <- GetResource($"Minesweeper_{value}")
+        if cellState = Unopened then
+            valuedCellState <- Uncovered
+            label.BackgroundImage <- GetResource($"Minesweeper_{value}")
     member this.IncrementValue() = value <- value + 1
     member this.ValuedCellState = valuedCellState
     override this.CellState = cellState
     override this.Label = label
+    override this.UpdateCellState _cellState = cellState <- _cellState

@@ -28,6 +28,7 @@
     <Compile Include="ValuedCellState.fs" />
     <Compile Include="Difficulty.fs" />
     <Compile Include="BoardSizes.fs" />
+    <Compile Include="Banner.fs" />
     <Compile Include="BaseCell.fs" />
     <Compile Include="MineCell.fs" />
     <Compile Include="ValuedCell.fs" />

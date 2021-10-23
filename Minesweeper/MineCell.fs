@@ -9,7 +9,7 @@ open MineState
 open CellState
 open MinesweeperResourceManager
 
-type MineCell (_col : int, _row : int, _callBack : MouseEventArgs * Label * CellState -> unit) =
+type MineCell (_col : int, _row : int, _callBack : MouseEventArgs * Label * CellState * int * int -> unit) =
     inherit BaseCell(_col, _row)
     let mutable mineState = Revealed
     let mutable cellState = Unopened
@@ -18,17 +18,7 @@ type MineCell (_col : int, _row : int, _callBack : MouseEventArgs * Label * Cell
         match e.Button with
         | MouseButtons.Left -> 
             mineState <- Exploded
-        | MouseButtons.Right ->
-            if not (mineState = Exploded) then
-                match cellState with
-                | Question_Mark -> 
-                    cellState <- Unopened
-                | Flag -> 
-                    cellState <- Question_Mark
-                | Unopened -> 
-                    cellState <- Flag
-                label.BackgroundImage <- GetResource($"{cellState}")
-        | _ -> ()
+        | _ -> ignore()
 
     do
         let image = GetResource($"{cellState}")
@@ -37,14 +27,16 @@ type MineCell (_col : int, _row : int, _callBack : MouseEventArgs * Label * Cell
         label.BackgroundImage <- image
         label.Left <- (image.Width / 2) * _col
         label.Top <- (image.Height / 2) * _row
-        label.MouseClick.Add(fun e -> _callBack(e, label, cellState))
+        label.MouseClick.Add(fun e -> _callBack(e, label, cellState, _col, _row))
         label.MouseClick.Add(Label_OnClick)
 
     member this.Reveal() = 
-        mineState <- Missed
-        label.BackgroundImage <- GetResource($"Mine_{mineState}")
+        if not (cellState = Flag) then
+            mineState <- Missed
+            label.BackgroundImage <- GetResource($"Mine_{mineState}")
     member this.Detonate() =
         mineState <- Exploded
         label.BackgroundImage <- GetResource($"Mine_{mineState}")
     override this.CellState = cellState
     override this.Label = label
+    override this.UpdateCellState _cellState = cellState <- _cellState

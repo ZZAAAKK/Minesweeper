@@ -14,11 +14,6 @@ type MineCell (_col : int, _row : int, _callBack : MouseEventArgs * Label * Cell
     let mutable mineState = Revealed
     let mutable cellState = Unopened
     let label = new Label()
-    let Label_OnClick (e : MouseEventArgs) =
-        match e.Button with
-        | MouseButtons.Left -> 
-            mineState <- Exploded
-        | _ -> ignore()
 
     do
         let image = GetResource($"{cellState}")
@@ -28,7 +23,6 @@ type MineCell (_col : int, _row : int, _callBack : MouseEventArgs * Label * Cell
         label.Left <- (image.Width / 2) * _col
         label.Top <- (image.Height / 2) * _row
         label.MouseClick.Add(fun e -> _callBack(e, label, cellState, _col, _row))
-        label.MouseClick.Add(Label_OnClick)
 
     member this.Reveal() = 
         if not (cellState = Flag) then
@@ -37,6 +31,10 @@ type MineCell (_col : int, _row : int, _callBack : MouseEventArgs * Label * Cell
     member this.Detonate() =
         mineState <- Exploded
         label.BackgroundImage <- GetResource($"Mine_{mineState}")
+    member this.AddFlag() =
+        if not (cellState = Flag) then
+            cellState <- Flag
+            label.BackgroundImage <- GetResource($"{cellState}")
     override this.CellState = cellState
     override this.Label = label
     override this.UpdateCellState _cellState = cellState <- _cellState

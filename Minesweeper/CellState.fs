@@ -1,3 +1,3 @@
 ﻿module CellState
 
-type CellState = Unopened | Flag | Question_Mark
+type CellState = Unopened | Opened | Flag | Question_Mark

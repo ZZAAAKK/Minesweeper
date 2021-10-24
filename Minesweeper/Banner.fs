@@ -21,7 +21,7 @@ type Banner () =
         let sb = new StringBuilder()
         for c in ret do c |> sb.Append |> ignore
         sb.ToString()
-    let ResetTimer _ =
+    let ResetTimer() =
         gameTicks <- 0
         timer.Text <- PadLeftInt <| gameTicks
         t.Stop()
@@ -31,8 +31,9 @@ type Banner () =
         panel.Height <- 38
         panel.Font <- new Font("Seven Segment", 28f)
         resetButton.Size <- new Size(36, 36)
-        resetButton.Left <- panel.Width - (resetButton.Width / 2)
-        resetButton.Click.Add(ResetTimer)
+        resetButton.Location <- new Point((panel.Width - resetButton.Width) / 2, (panel.Height - resetButton.Height) / 2)
+        resetButton.Anchor <- AnchorStyles.None
+        resetButton.Click.Add(fun _ -> ResetTimer())
         resetButton.BackgroundImage <- GetResource("Reset_Normal")
         resetButton.BackgroundImageLayout <- ImageLayout.Stretch
         timer.Width <- 72
@@ -67,7 +68,7 @@ type Banner () =
         mineCounter.Text <- PadLeftInt <| n
     member this.ResetTimerNewGame n =
         resetButton.BackgroundImage <- GetResource("Reset_Normal")
-        timer.Text <- PadLeftInt <| gameTicks
+        ResetTimer()
         n |> this.UpdateMineCounter
         t.Start()
     member this.StopTimer () =

@@ -7,21 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="Resources\Flag.png" />
-    <Content Include="Resources\Minesweeper_0.png" />
-    <Content Include="Resources\Minesweeper_1.png" />
-    <Content Include="Resources\Minesweeper_2.png" />
-    <Content Include="Resources\Minesweeper_3.png" />
-    <Content Include="Resources\Minesweeper_4.png" />
-    <Content Include="Resources\Minesweeper_5.png" />
-    <Content Include="Resources\Minesweeper_6.png" />
-    <Content Include="Resources\Minesweeper_7.png" />
-    <Content Include="Resources\Minesweeper_8.png" />
-    <Content Include="Resources\Mine_Exploded.png" />
-    <Content Include="Resources\Mine_Missed.png" />
-    <Content Include="Resources\Mine_Revealed.png" />
-    <Content Include="Resources\Question_Mark.png" />
-    <Content Include="Resources\Unopened.png" />
+    <Content Include="Resources\Seven Segment.ttf" />
     <Compile Include="MinesweeperResourceManager.fs" />
     <Compile Include="MineState.fs" />
     <Compile Include="CellState.fs" />
@@ -32,6 +18,8 @@
     <Compile Include="BaseCell.fs" />
     <Compile Include="MineCell.fs" />
     <Compile Include="ValuedCell.fs" />
+    <Compile Include="CustomGameForm.fs" />
+    <Compile Include="MainMenuBar.fs" />
     <Compile Include="Board.fs" />
     <Compile Include="Interface.fs" />
     <Compile Include="Program.fs" />
